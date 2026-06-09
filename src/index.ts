@@ -1,13 +1,13 @@
-const { GlobalKeyboardListener } = require('node-global-key-listener');
+import { GlobalKeyboardListener, IGlobalKeyDownMap, IGlobalKeyListener } from 'node-global-key-listener';
 const audio = require('win-audio');
-const { SysTray } = require('node-systray-v2');
-const fs = require('fs').promises;
-const path = require('path');
-const { ShortcutController, Shortcut } = require('./src/shortcutController/shortcut.controller');
-const notifier = require('node-notifier');
+import { Menu, MenuItem, SysTray } from 'node-systray-v2';
+import fs from 'fs/promises';
+import path from 'path';
+import { ShortcutController, Shortcut } from './shortcutController/shortcut.controller';
+import notifier from 'node-notifier';
 
 (async function main() {
-  const iconsDir = path.resolve(__dirname, 'icons');
+  const iconsDir = path.resolve(__dirname, '../', 'icons');
   const appIconPath = path.resolve(iconsDir, 'icon.png');
 
   const activeIcon = await fs.readFile(path.resolve(iconsDir, 'active.ico'), { encoding: 'base64' });
@@ -18,31 +18,35 @@ const notifier = require('node-notifier');
   const mic = audio.mic;
   let shortcutListener = new GlobalKeyboardListener();
 
-  const appNameItem = {
+  const appNameItem: MenuItem = {
     title: 'MuteMic',
     tooltip: 'MuteMic',
     enabled: false,
+    checked: false
   };
 
-  let currentShortcutItem = {
+  let currentShortcutItem: MenuItem = {
     title: shortcutController.shortcut.toString(),
     tooltip: 'Shortcut',
     enabled: false,
+    checked: false
   };
 
-  const changeShortcutItem = {
+  const changeShortcutItem: MenuItem = {
     title: 'Set shortcut',
     tooltip: 'Set shortcut',
     enabled: true,
+    checked: false
   };
 
-  const exitItem = {
+  const exitItem: MenuItem = {
     title: 'Close',
     tooltip: 'Close',
     enabled: true,
+    checked: false
   };
 
-  const menu = {
+  const menu: Menu = {
     icon: mic.isMuted() ? mutedIcon : activeIcon,
     title: 'MicMute',
     tooltip: 'MicMute',
@@ -56,14 +60,15 @@ const notifier = require('node-notifier');
 
   const sysTray = new SysTray({ menu });
 
-  const onShortcut = function (e, down) {
-    const matched = shortcutController.shortcut.keys.every(key => down[key] === true);
+  const onShortcut: IGlobalKeyListener = function (_, down) {
+    const matched = shortcutController.shortcut.keys.every(key => down[key as keyof IGlobalKeyDownMap] === true);
 
     if (matched) {
       mic.toggle();
 
       menu.icon = mic.isMuted() ? mutedIcon : activeIcon;
 
+      //@ts-ignore
       sysTray.sendAction({
         menu,
         type: 'update-menu'
@@ -76,7 +81,7 @@ const notifier = require('node-notifier');
   sysTray.onClick(async action => {
     switch (action.seq_id) {
       case 2: {
-        const wannaChangeShortcutResult = await new Promise((resolve, reject) => {
+        const wannaChangeShortcutResult = await new Promise<string>((resolve, reject) => {
           notifier.notify({
             title: 'Do you want to change shortcut?',
             message: 'After press "Yes" hold new shortcut until next notification',
@@ -94,20 +99,20 @@ const notifier = require('node-notifier');
 
         shortcutListener.removeListener(onShortcut);
 
-        function getShortcut(shortcutListener, finishAfterKeyDown = 1000, failDelay = 5000) {
+        function getShortcut(shortcutListener: GlobalKeyboardListener, finishAfterKeyDown = 1000, failDelay = 5000): Promise<Shortcut> {
           return new Promise((resolve, reject) => {
-            const keys = new Set();
-            let changeTimeout = null;
-            let failTimeout = null;
+            const keys = new Set<string>();
+            let changeTimeout: NodeJS.Timeout = null;
+            let failTimeout: NodeJS.Timeout = null;
 
-            const onShortcutChange = function (e, down) {
-              if (e.state === 'DOWN') {
-                if (keys.has(e.name)) return false;
-                keys.add(e.name);
+            const onShortcutChange: IGlobalKeyListener = function (event) {
+              if (event.state === 'DOWN') {
+                if (keys.has(event.name)) return false;
+                keys.add(event.name);
 
                 if (failTimeout) clearTimeout(failTimeout);
               } else {
-                keys.delete(e.name);
+                keys.delete(event.name);
               }
 
               if (changeTimeout) clearTimeout(changeTimeout);
@@ -134,7 +139,7 @@ const notifier = require('node-notifier');
         try {
           _shortcut = await getShortcut(shortcutListener);
         } catch (e) {
-          console.error(`Cannot get new shortcut: ${e.message}`);
+          console.error(`Cannot get new shortcut: ${(e as Error).message}`);
         }
 
         shortcutListener.kill();
@@ -151,7 +156,7 @@ const notifier = require('node-notifier');
           return false;
         }
 
-        const saveShortcutResult = await new Promise((resolve, reject) => {
+        const saveShortcutResult = await new Promise<string>((resolve, reject) => {
           notifier.notify({
             title: 'Changing shortcut',
             message: `Do you want to save shortcut: ${_shortcut.toString()}?`,

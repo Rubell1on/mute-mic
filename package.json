@@ -1,9 +1,12 @@
 {
   "name": "mute-mic",
-  "version": "0.9.1",
-  "main": "index.js",
+  "version": "0.9.2",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
-    "start": "node ./index.js"
+    "start": "node ./dist/index.js",
+    "build": "tsc",
+    "dev": "npx ts-node ./src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +16,12 @@
     "node-global-key-listener": "^0.3.0",
     "node-notifier": "^10.0.1",
     "node-systray-v2": "github:Edgar-P-yan/node-systray-v2",
+    "typescript": "^6.0.3",
     "win-audio": "^3.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.2",
+    "@types/node-notifier": "^8.0.5",
+    "ts-node": "^10.9.2"
   }
 }
