@@ -68,10 +68,10 @@ import notifier from 'node-notifier';
 
       menu.icon = mic.isMuted() ? mutedIcon : activeIcon;
 
-      //@ts-ignore
       sysTray.sendAction({
         menu,
-        type: 'update-menu'
+        type: 'update-menu',
+        seq_id: 0
       })
     }
 
