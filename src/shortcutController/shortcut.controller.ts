@@ -1,8 +1,10 @@
-const fs = require('fs').promises;
-const path = require('path');
+import fs from 'fs/promises';
+import path from 'path';
 
-class Shortcut {
-  constructor(keys) {
+export class Shortcut {
+  keys: string[];
+
+  constructor(keys: string[]) {
     this.keys = keys;
   }
 
@@ -14,20 +16,20 @@ class Shortcut {
 const DEFAULT_SHORTCUT = ['LEFT CTRL', 'LEFT ALT'];
 const SHORTCUT_FILE_PATH = path.resolve(__dirname, '../../shortcut.json');
 
-class ShortcutController {
-  shortcut;
+export class ShortcutController {
+  shortcut: Shortcut;
 
   async load() {
-    let shortcutFile = null;
+    let shortcutFile: string = null;
 
     try {
-      shortcutFile = await fs.readFile(SHORTCUT_FILE_PATH)
+      shortcutFile = await fs.readFile(SHORTCUT_FILE_PATH, { encoding: 'utf-8' })
     } catch (e) {
       console.info('Shortcut file not found');
     }
 
     if (shortcutFile) {
-      const _shortcut = JSON.parse(shortcutFile);
+      const _shortcut: Pick<Shortcut, 'keys'> = JSON.parse(shortcutFile);
 
       if (
         typeof _shortcut === 'object'
@@ -48,7 +50,7 @@ class ShortcutController {
     await fs.writeFile(SHORTCUT_FILE_PATH, JSON.stringify(shortcut));
   }
 
-  async save(shortcut) {
+  async save(shortcut: Shortcut) {
     if (!(shortcut instanceof Shortcut)) {
       throw new Error('Ожидался инстанц Shortcut');
     }
@@ -58,5 +60,3 @@ class ShortcutController {
     this.shortcut = shortcut;
   }
 }
-
-module.exports = { ShortcutController, Shortcut };

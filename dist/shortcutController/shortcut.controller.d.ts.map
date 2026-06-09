@@ -1,0 +1,1 @@
+{"version":3,"file":"shortcut.controller.d.ts","sourceRoot":"","sources":["../../src/shortcutController/shortcut.controller.ts"],"names":[],"mappings":"AAGA,qBAAa,QAAQ;IACnB,IAAI,EAAE,MAAM,EAAE,CAAC;gBAEH,IAAI,EAAE,MAAM,EAAE;IAI1B,QAAQ;CAGT;AAKD,qBAAa,kBAAkB;IAC7B,QAAQ,EAAE,QAAQ,CAAC;IAEb,IAAI;IA+BJ,IAAI,CAAC,QAAQ,EAAE,QAAQ;CAS9B"}
